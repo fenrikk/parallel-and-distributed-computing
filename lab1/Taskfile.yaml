@@ -1,0 +1,40 @@
+version: '3'
+
+tasks:
+  build:
+    desc: Compile the OpenMP program using GCC
+    cmds:
+      - |
+          {{.GCC_PATH}} -fopenmp {{.SRC_FILE}} -o {{.BIN_NAME}}
+    vars:
+      GCC_PATH: /opt/homebrew/bin/gcc-14
+      SRC_FILE: main.c
+      BIN_NAME:
+        sh: echo "$(basename $(pwd))_bin"
+
+  run:
+    desc: Run program
+    deps: [build]
+    cmds:
+      - ./{{.BIN_NAME}}
+    vars:
+      BIN_NAME:
+        sh: echo "$(basename $(pwd))_bin"
+
+  run-with-threads:
+    desc: Run with specified number of threads
+    deps: [build]
+    cmds:
+      - OMP_NUM_THREADS={{.THREADS}} ./{{.BIN_NAME}}
+    vars:
+      THREADS: '{{default "4" .THREADS}}'
+      BIN_NAME:
+        sh: echo "$(basename $(pwd))_bin"
+
+  clean:
+    desc: Remove compiled binary
+    cmds:
+      - rm -f {{.BIN_NAME}}
+    vars:
+      BIN_NAME:
+        sh: echo "$(basename $(pwd))_bin"
